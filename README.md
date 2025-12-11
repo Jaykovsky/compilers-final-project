@@ -1,197 +1,207 @@
-🗃️ SQL-to-MongoDB Transpiler
+---
 
-Un transpilador escrito en Node.js que convierte consultas SQL básicas (SELECT, INSERT, UPDATE y DELETE) en consultas equivalentes de MongoDB usando sintaxis JavaScript.
+```markdown
+# 🛠️ SQL → MongoDB Transpiler  
+Convierte consultas SQL básicas en comandos equivalentes de MongoDB.
 
-Este proyecto demuestra el pipeline completo de un compilador:
+---
 
-Análisis léxico (lexer)
+## 📌 Descripción del Proyecto
 
-Análisis sintáctico (parser)
+Este proyecto es un **transpilador** que toma una consulta SQL y la convierte automáticamente en una instrucción equivalente de **MongoDB**.  
+Está desarrollado en **Node.js** y funciona como herramienta educativa para comprender cómo se traducen operaciones de SQL (modelo relacional) a MongoDB (modelo documental).
 
-Construcción del AST
+Soporta:
 
-Análisis semántico simple
+- `SELECT` → `find()`
+- `INSERT` → `insertOne()`
+- `UPDATE` → `updateMany()`
+- `DELETE` → `deleteMany()`
 
-Generación de código MongoDB
+---
 
-Es ideal para un curso de Compiladores, Lenguajes de Programación o Bases de Datos.
+## 🚀 Objetivos
 
-📖 Descripción General
+- Comprender diferencias entre SQL y MongoDB  
+- Implementar un lexer y parser manual  
+- Generar un AST y traducirlo a MongoDB  
+- Desarrollar habilidades en parsing y generación de código  
 
-Este proyecto permitió construir un transpilador capaz de:
+---
 
-✔️ Leer una consulta SQL
-✔️ Convertirla en tokens mediante un lexer
-✔️ Parsearla usando una gramática definida manualmente
-✔️ Generar un Árbol Sintáctico Abstracto (AST)
-✔️ Producir una consulta MongoDB equivalente
+## 📂 Estructura del Proyecto
 
-De esta forma, un usuario que conoce SQL puede interactuar con bases de datos NoSQL como MongoDB sin aprender otro lenguaje de consultas.
+```
 
-⭐ Características
-✔️ Soporta los siguientes comandos SQL:
+sql-to-mongo/
+│
+├── src/
+│   ├── lexer.js
+│   ├── parser.js
+│   ├── generador.js
+│   ├── cli.js
+│   ├── examples.js
+│   ├── index.js
+│
+└── README.md
 
-SELECT
+````
 
-INSERT
+---
 
-UPDATE
+## 📦 Instalación
 
-DELETE
-
-✔️ Soporta:
-
-WHERE con operadores:
-=, !=, >, <, >=, <=
-
-AND / OR
-
-SELECT columna1, columna2
-
-SELECT *
-
-Inserción de múltiples columnas
-
-Update con múltiples asignaciones
-
-Eliminación con condiciones
-
-✔️ Genera código válido de MongoDB:
-
-db.collection.find(query, projection)
-
-db.collection.insertOne(document)
-
-db.collection.updateMany(filter, update)
-
-db.collection.deleteMany(filter)
-
-✔️ Implementado 100% con Node.js (sin librerías externas de parsing)
-
-🧠 Arquitectura del Compilador
-
-El transpiler sigue el pipeline clásico de un compilador:
-
-SQL Query
-    │
-    ▼
-┌────────┐
-│ Lexer  │ — reconoce tokens
-└────────┘
-    │
-    ▼
-┌────────┐
-│ Parser │ — arma el AST según la gramática
-└────────┘
-    │
-    ▼
-┌──────────────┐
-│ AST Builder  │
-└──────────────┘
-    │
-    ▼
-┌─────────────────┐
-│ Code Generator  │ — produce MongoDB JS
-└─────────────────┘
-    │
-    ▼
-MongoDB Query
-
-📦 Instalación
+```bash
 git clone https://github.com/Jaykovsky/compilers-final-project
-cd sql-to-mongo-transpiler
+cd sql-to-mongo
 npm install
+````
 
-▶️ Uso
+---
 
-Ejecutar desde la terminal:
+## ▶️ Uso
 
-node transpiler.js "SELECT nombre FROM usuarios WHERE edad > 20;"
+```js
+const { transpileSQL } = require("./src");
 
+const sql = "SELECT nombre, edad FROM usuarios WHERE edad > 20;";
+console.log(transpileSQL(sql));
+```
 
 Salida:
 
-db.usuarios.find({"edad":{"$gt":20}}, {"nombre":1});
-
-
-También puedes ejecutar los tests incluidos:
-
-npm test
-
-🧪 Ejemplos de Transpilación
-🔹 SELECT con columnas
-
-SQL:
-
-SELECT nombre, edad FROM usuarios WHERE edad > 20;
-
-
-MongoDB:
-
+```js
 db.usuarios.find({ "edad": { "$gt": 20 } }, { "nombre": 1, "edad": 1 });
+```
 
-🔹 SELECT *
+---
 
-SQL:
+## 📘 Sentencias soportadas
 
-SELECT * FROM usuarios WHERE activo = 1;
+### **SELECT**
 
+**SQL**
 
-MongoDB:
+```sql
+SELECT nombre, edad FROM usuarios WHERE edad > 20;
+```
 
-db.usuarios.find({ "activo": 1 });
+**MongoDB**
 
-🔹 INSERT
+```js
+db.usuarios.find({ edad: { $gt: 20 } }, { nombre: 1, edad: 1 });
+```
+
+---
+
+### **INSERT**
+
+```sql
 INSERT INTO usuarios (nombre, edad, email) VALUES ('Ana', 28, 'ana@mail.com');
+```
 
+```js
+db.usuarios.insertOne({ nombre: "Ana", edad: 28, email: "ana@mail.com" });
+```
 
-MongoDB:
+---
 
-db.usuarios.insertOne({
-  "nombre": "Ana",
-  "edad": 28,
-  "email": "ana@mail.com"
-});
+### **UPDATE**
 
-🔹 UPDATE
+```sql
 UPDATE usuarios SET puntos = 100 WHERE id = 5;
+```
 
+```js
+db.usuarios.updateMany({ id: 5 }, { $set: { puntos: 100 } });
+```
 
-MongoDB:
+---
 
-db.usuarios.updateMany({ "id": 5 }, { "$set": { "puntos": 100 }});
+### **DELETE**
 
-🔹 DELETE
-DELETE FROM sesiones WHERE expirado = 1;
+```sql
+DELETE FROM usuarios WHERE expirado = 1;
+```
 
+```js
+db.usuarios.deleteMany({ expirado: 1 });
+```
 
-MongoDB:
+---
 
-db.sesiones.deleteMany({ "expirado": 1 });
+## 🧠 ¿Cómo funciona?
 
-📁 Estructura del Código
-/project
-   ├── lexer.js          → análisis léxico
-   ├── parser.js         → gramática y construcción del AST
-   ├── ast.js            → definición de nodos del AST
-   ├── generator.js      → generación de código MongoDB
-   ├── transpiler.js     → CLI y flujo principal
-   ├── tests/
-   │     └── examples.js → casos de prueba
-   └── README.md
+El transpilador se divide en 3 etapas:
 
-⚠️ Limitaciones
+---
 
-Este proyecto implementa una subconjunto de SQL:
+### 1️⃣ Lexer (Análisis Léxico)
 
-No soporta *
+Convierte la cadena SQL en tokens, por ejemplo:
 
-No soporta JOIN
+```
+SELECT nombre FROM usuarios
+```
 
-No soporta GROUP BY, HAVING, ORDER BY
+→
 
-No soporta subconsultas
+```
+[SELECT, IDENT(nombre), FROM, IDENT(usuarios)]
+```
 
-No soporta funciones: COUNT(), MAX(), etc.
+---
 
-Asume sintaxis SQL simple y bien formada
+### 2️⃣ Parser (Análisis Sintáctico)
+
+Construye el AST (árbol sintáctico):
+
+```json
+{
+  "type": "SELECT",
+  "fields": ["nombre", "edad"],
+  "table": "usuarios",
+  "where": {
+    "field": "edad",
+    "op": ">",
+    "value": 20
+  }
+}
+```
+
+---
+
+### 3️⃣ Translator (Generación de Código)
+
+Traduce el AST a MongoDB usando equivalencias:
+
+* `>` → `$gt`
+* `<` → `$lt`
+* `=` → valor directo
+* Tabla SQL → colección Mongo
+* Campos → proyección
+
+---
+
+## 🧪 Tests
+
+```bash
+npm test
+```
+
+Incluye casos reales de SQL → MongoDB.
+
+---
+
+## 📌 Limitaciones
+
+* No soporta `SELECT *`
+* No soporta expresiones complejas (`AND`, `OR`, paréntesis)
+* Parser simple (no usa gramáticas formales)
+
+---
+
+```
+
+```
+
