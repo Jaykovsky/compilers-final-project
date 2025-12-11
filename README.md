@@ -1,11 +1,3 @@
----
-
-```markdown
-# 🛠️ SQL → MongoDB Transpiler  
-Convierte consultas SQL básicas en comandos equivalentes de MongoDB.
-
----
-
 ## 📌 Descripción del Proyecto
 
 Este proyecto es un **transpilador** que toma una consulta SQL y la convierte automáticamente en una instrucción equivalente de **MongoDB**.  
